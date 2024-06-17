@@ -89,6 +89,7 @@ func (b *Board) CalculateChoices() {
 }
 
 func (b *Board) Print() {
+	fmt.Println("Board:")
 	fmt.Println("┌─────┬─────┬─────┐")
 	for rw := 0; rw < 9; rw++ {
 		for rep := 0; rep < 3; rep++ {
@@ -105,5 +106,19 @@ func (b *Board) Print() {
 }
 
 func (b *Board) PrintCandidates() {
-
+	// Print candidates per cell
+	fmt.Println("Candidates:")
+	fmt.Println("┌─────┬─────┬─────┐")
+	for rw := 0; rw < 9; rw++ {
+		for rep := 0; rep < 3; rep++ {
+			offset := rw*9 + rep*3
+			fmt.Printf("│%s %s %s", toChar(b.Vals[offset+0]), toChar(b.Vals[offset+1]),
+				toChar(b.Vals[offset+2]))
+		}
+		fmt.Println("│")
+		if (rw+1)%3 == 0 && rw < 8 {
+			fmt.Println("├─────┼─────┼─────┤")
+		}
+	}
+	fmt.Println("└─────┴─────┴─────┘")
 }
