@@ -35,4 +35,5 @@ func main() {
 
 	board := sudoku.New(string(content))
 	board.Print()
+	board.PrintCandidates()
 }

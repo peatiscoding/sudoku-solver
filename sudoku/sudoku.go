@@ -10,13 +10,6 @@ type Board struct {
 	Candidates [81]uint16 // bitwise of 9 choices (2^10 - 1) = (1024 - 1) = 1023
 }
 
-func toChar(i uint8) string {
-	if i >= 1 && i <= 9 {
-		return fmt.Sprintf("%d", i)
-	}
-	return " "
-}
-
 // Create a disable mask for a list of numbers
 //
 // Example
@@ -108,17 +101,20 @@ func (b *Board) Print() {
 func (b *Board) PrintCandidates() {
 	// Print candidates per cell
 	fmt.Println("Candidates:")
-	fmt.Println("┌─────┬─────┬─────┐")
+	fmt.Println("┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐")
 	for rw := 0; rw < 9; rw++ {
-		for rep := 0; rep < 3; rep++ {
-			offset := rw*9 + rep*3
-			fmt.Printf("│%s %s %s", toChar(b.Vals[offset+0]), toChar(b.Vals[offset+1]),
-				toChar(b.Vals[offset+2]))
+		for tinyRow := 0; tinyRow < 3; tinyRow++ {
+			for cl := 0; cl < 9; cl++ {
+				offset := rw*9 + cl
+				cand := getCandidates(b.Candidates[offset], uint8(tinyRow*3))
+				fmt.Printf("│%s %s %s", cand[0], cand[1], cand[2])
+			}
+			fmt.Println("│")
 		}
-		fmt.Println("│")
-		if (rw+1)%3 == 0 && rw < 8 {
-			fmt.Println("├─────┼─────┼─────┤")
+
+		if rw < 8 {
+			fmt.Println("├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤")
 		}
 	}
-	fmt.Println("└─────┴─────┴─────┘")
+	fmt.Println("└─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘")
 }
