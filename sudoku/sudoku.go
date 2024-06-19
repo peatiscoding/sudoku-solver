@@ -10,19 +10,6 @@ type Board struct {
 	Candidates [81]uint16 // bitwise of 9 choices (2^10 - 1) = (1024 - 1) = 1023
 }
 
-// Create a disable mask for a list of numbers
-//
-// Example
-// @maskPostions = [1, 2, 3, 5]
-// @return maskNumber = 0000010111
-func createBitMask(maskPositions []uint8) uint16 {
-	mask := uint16(0)
-	for _, n := range maskPositions {
-		mask |= 1 << (n - 1)
-	}
-	return mask
-}
-
 func New(input string) *Board {
 	b := &Board{
 		Vals:       [81]uint8{},
@@ -36,7 +23,8 @@ func New(input string) *Board {
 	for i := 0; i < 81; i++ {
 		if i < len(input) && input[i] != ' ' {
 			b.Vals[i] = uint8(input[i] - '0')
-			b.Candidates[i] = 1 << (b.Vals[i] - 1)
+			// b.Candidates[i] = 1 << (b.Vals[i] - 1)
+			b.Candidates[i] = 0
 		} else {
 			b.Vals[i] = 0
 			b.Candidates[i] = 1023 // all choices are possible.
@@ -44,6 +32,35 @@ func New(input string) *Board {
 	}
 	b.CalculateChoices()
 	return b
+}
+
+func (b *Board) bitMasks(position uint8) [3]uint16 {
+	out := [3]uint16{
+		0,
+		0,
+		0,
+	}
+	row := position / 9 // first of the row
+	out[0] = createBitMask(b.Vals[row : row+9])
+
+	col := position % 9 // first of each col
+	colPicked := make([]uint8, 9)
+	for rw := uint8(0); rw < 9; rw++ {
+		colPicked[rw] = b.Vals[rw*9+col]
+	}
+	out[1] = createBitMask(colPicked)
+
+	blkTop := position / 27 * 27 // integer division by 27 = [0, 1, 2] then +27 per each block to the top
+	blkLeft := (col / 3) * 3     // integer mod 3 +3 per each block on the left
+	blkOffset := blkTop + blkLeft
+	blkPicked := make([]uint8, 9)
+	for rw := uint8(0); rw < 3; rw++ {
+		for cl := uint8(0); cl < 3; cl++ {
+			blkPicked[3*rw+cl] = b.Vals[blkOffset+rw*9+cl]
+		}
+	}
+	out[2] = createBitMask(blkPicked)
+	return out
 }
 
 func (b *Board) CalculateChoices() {
@@ -66,10 +83,13 @@ func (b *Board) CalculateChoices() {
 	}
 	// (c) Check same block
 	for blk := 0; blk < 9; blk++ {
+		top := blk / 3 * 27
+		left := (blk % 3) * 3
+		offset := top + left
 		picked := make([]uint8, 9)
 		for rw := 0; rw < 3; rw++ {
 			for col := 0; col < 3; col++ {
-				picked[rw*3+col] = b.Vals[blk*9+rw*3+col]
+				picked[rw*3+col] = b.Vals[offset+rw*9+col]
 			}
 		}
 		blkMasks[blk] = createBitMask(picked)
@@ -77,7 +97,7 @@ func (b *Board) CalculateChoices() {
 
 	// Update candidates back
 	for i := 0; i < 81; i++ {
-		b.Candidates[i] = 1023 & ^(rowMasks[i/9] | colMasks[i%9] | blkMasks[i/27*3+i%9/3])
+		b.Candidates[i] = createCandidate(b.Vals[i], []uint16{rowMasks[i/9], colMasks[i%9], blkMasks[i/27*3+i%9/3]})
 	}
 }
 

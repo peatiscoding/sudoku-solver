@@ -4,6 +4,31 @@ import (
 	"fmt"
 )
 
+// Create a disable mask for a list of numbers
+//
+// Example
+// @maskPostions = [1, 2, 3, 5]
+// @return maskNumber = 0000010111
+func createBitMask(maskPositions []uint8) uint16 {
+	mask := uint16(0)
+	for _, n := range maskPositions {
+		mask |= 1 << (n - 1)
+	}
+	return mask
+}
+
+func createCandidate(value uint8, bitMasks []uint16) uint16 {
+	mask := uint16(0)
+	// value already set
+	if value > 0 {
+		return mask
+	}
+	for _, n := range bitMasks {
+		mask |= n
+	}
+	return 1023 & ^mask
+}
+
 func toChar(i uint8) string {
 	if i >= 1 && i <= 9 {
 		return fmt.Sprintf("%d", i)
