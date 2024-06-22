@@ -1,6 +1,7 @@
 package sudoku
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -39,7 +40,8 @@ func New(input string) *Board {
 func (b *Board) Set(position uint8, value uint8) bool {
 	candidate := b.Candidates[position] // bitMask of possible values
 	valBit := uint16(1) << (value - 1)
-	if valBit&candidate > 0 {
+	// fmt.Printf("Position: %d, Value: %d;\nVAL :%b\nCAND: %b\nRES :%b\n", position, value, valBit, candidate, valBit&candidate)
+	if valBit&candidate == 0 {
 		return false
 	}
 	b.Vals[position] = value
@@ -47,8 +49,39 @@ func (b *Board) Set(position uint8, value uint8) bool {
 	return true
 }
 
+// Validate board if there is any conficts by Rules
 func (b *Board) Validate() error {
-	// Validate board if there is any conficts by Rules
+	// Check Row
+	for row := uint8(0); row < 9; row++ {
+		if res := checkDuplicates(b.Vals[row : row+9]); res != Complete {
+			return errors.New(fmt.Sprintf("Validation failed on Row %d: ValidationCode=%d", row, res))
+		}
+	}
+
+	for col := uint8(0); col < 9; col++ {
+		colPicked := make([]uint8, 9)
+		for rw := uint8(0); rw < 9; rw++ {
+			colPicked[rw] = b.Vals[rw*9+col]
+		}
+		if res := checkDuplicates(colPicked); res != Complete {
+			return errors.New(fmt.Sprintf("Validation failed on col %d: ValidationCode=%d", col, res))
+		}
+	}
+
+	for blk := uint8(0); blk < 9; blk++ {
+		blkTop := blk / 3 * 27   // integer division by 27 = [0, 1, 2] then +27 per each block to the top
+		blkLeft := (blk % 3) * 3 // integer mod 3 +3 per each block on the left
+		blkOffset := blkTop + blkLeft
+		blkPicked := make([]uint8, 9)
+		for rw := uint8(0); rw < 3; rw++ {
+			for cl := uint8(0); cl < 3; cl++ {
+				blkPicked[3*rw+cl] = b.Vals[blkOffset+rw*9+cl]
+			}
+		}
+		if res := checkDuplicates(blkPicked); res != Complete {
+			return errors.New(fmt.Sprintf("Validation failed on block %d: ValidationCode=%d", blk, res))
+		}
+	}
 	return nil
 }
 

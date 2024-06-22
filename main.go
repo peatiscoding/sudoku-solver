@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/peatiscoding/sudoku-solver/sudoku"
+	solvers_wfc "github.com/peatiscoding/sudoku-solver/sudoku/solvers"
 )
 
 func main() {
@@ -34,6 +35,11 @@ func main() {
 	}
 
 	board := sudoku.New(string(content))
+
 	board.Print()
 	board.PrintCandidates()
+
+	// Solve
+	solvers_wfc.Solve(board)
+	board.Print()
 }
