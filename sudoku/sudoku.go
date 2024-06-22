@@ -34,6 +34,14 @@ func New(input string) *Board {
 	return b
 }
 
+func (b *Board) Set(position uint8, value uint8) {
+	b.Vals[position] = value
+	b.CalculateChoices()
+}
+
+// Compute bitMasks for provided position
+// @position position of interest to compute
+// @return bitMasks for Row, Column, Block
 func (b *Board) bitMasks(position uint8) [3]uint16 {
 	out := [3]uint16{
 		0,

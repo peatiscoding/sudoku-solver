@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// Create a disable mask for a list of numbers
+// Create a bit mask for a list of numbers in given group. (Row, Column, Block)
 //
 // Example
 // @maskPostions = [1, 2, 3, 5]
@@ -17,6 +17,12 @@ func createBitMask(maskPositions []uint8) uint16 {
 	return mask
 }
 
+// Merge all bitMasks into one. And revert it to build up candidates
+//
+// Example
+// @value - the current value of the cell.
+// @bitMasks - list of bitMasks of surrounding (from the Row, from the Column, from the Block relative to this cell).
+// @return posible value of this cell.
 func createCandidate(value uint8, bitMasks []uint16) uint16 {
 	mask := uint16(0)
 	// value already set
@@ -37,6 +43,11 @@ func toChar(i uint8) string {
 }
 
 // Write out in block of 3
+// Print candidates as string in bulk of "3"
+//
+// @c - candidate
+// @offset - the offset bit of the candidates (0, 3, 6)
+// @return string of candidates
 func getCandidates(c uint16, offset uint8) [3]string {
 	out := [3]string{"", "", ""}
 	bit := uint16(1) << offset
