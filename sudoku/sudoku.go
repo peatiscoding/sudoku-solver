@@ -34,9 +34,22 @@ func New(input string) *Board {
 	return b
 }
 
-func (b *Board) Set(position uint8, value uint8) {
+// Update a cell with a new value
+// @return false if value is not valid.
+func (b *Board) Set(position uint8, value uint8) bool {
+	candidate := b.Candidates[position] // bitMask of possible values
+	valBit := uint16(1) << (value - 1)
+	if valBit&candidate > 0 {
+		return false
+	}
 	b.Vals[position] = value
 	b.CalculateChoices()
+	return true
+}
+
+func (b *Board) Validate() error {
+	// Validate board if there is any conficts by Rules
+	return nil
 }
 
 // Compute bitMasks for provided position

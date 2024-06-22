@@ -4,6 +4,14 @@ import (
 	"fmt"
 )
 
+type ValidationResult int
+
+const (
+	Complete ValidationResult = iota
+	Incomplete
+	ContainsDuplicate
+)
+
 // Create a bit mask for a list of numbers in given group. (Row, Column, Block)
 //
 // Example
@@ -60,4 +68,21 @@ func getCandidates(c uint16, offset uint8) [3]string {
 		bit = bit << 1
 	}
 	return out
+}
+
+func checkDuplicates(s []uint8) ValidationResult {
+	for i := 0; i < len(s); i++ {
+		if s[i] < 1 || s[i] > 9 {
+			panic(fmt.Sprintf("Invalid input expected 1~9. Got %d.", s[i]))
+		}
+		for j := i + 1; j < len(s); j++ {
+			if s[i] == s[j] {
+				return ContainsDuplicate
+			}
+		}
+	}
+	if len(s) == 9 {
+		return Complete
+	}
+	return Incomplete
 }

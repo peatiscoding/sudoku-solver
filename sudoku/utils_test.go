@@ -75,3 +75,44 @@ func TestCreateCandidates(t *testing.T) {
 		})
 	}
 }
+
+func TestCheckDuplicate(t *testing.T) {
+	tests := []struct {
+		name string
+		args []uint8
+		want ValidationResult
+	}{
+		{
+			name: "Complete",
+			args: []uint8{9, 2, 3, 4, 5, 6, 7, 8, 1},
+			want: Complete,
+		},
+		{
+			name: "Incomplete",
+			args: []uint8{1, 2, 3, 4, 5},
+			want: Incomplete,
+		},
+		{
+			name: "Incomplete with no value",
+			args: []uint8{},
+			want: Incomplete,
+		},
+		{
+			name: "Incomplete with duplicate",
+			args: []uint8{3, 4, 5, 5},
+			want: ContainsDuplicate,
+		},
+		{
+			name: "Complete with duplicate",
+			args: []uint8{1, 2, 3, 4, 5, 6, 7, 8, 9, 9},
+			want: ContainsDuplicate,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := checkDuplicates(tt.args); got != tt.want {
+				t.Errorf("checkDuplicates() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
